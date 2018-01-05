@@ -99,7 +99,7 @@ class SoftCascade implements SoftCascadeable
 
             $modelRelation = $model->$relation();
 
-            $foreignKeyUse = (method_exists($modelRelation, 'getQualifiedForeignPivotKeyName')) ? $modelRelation->getQualifiedForeignPivotKeyName() : $modelRelation->getQualifiedOwnerKeyName();
+            $foreignKeyUse = $this->getForeignKeyUse($modelRelation);
             $foreignKeyIdsUse = $foreignKeyIds;
 
             //Many to many relations need to get related ids and related local key
@@ -118,6 +118,25 @@ class SoftCascade implements SoftCascadeable
 
             $this->execute($modelRelation, $foreignKeyUse, $foreignKeyIdsUse, $affectedRows);
         }
+    }
+
+    /**
+     * Get forgein keys to use.
+     *
+     * @param Illuminate\Database\Eloquent\Relations\Relation $modelRelation
+     *
+     * @return array
+     */
+    protected function getForeignKeyUse($modelRelation) {
+        if (method_exists($modelRelation, 'getQualifiedForeignPivotKeyName')) {
+            return $modelRelation->getQualifiedForeignPivotKeyName();
+        }
+
+        if (method_exists($modelRelation, 'getQualifiedForeignKeyName')) {
+            return $modelRelation->getQualifiedForeignKeyName();
+        }
+
+        return $modelRelation->getQualifiedOwnerKeyName();
     }
 
     /**
